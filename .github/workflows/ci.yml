@@ -1,0 +1,48 @@
+name: Public checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - name: Scan source history with a verified public scanner
+        run: |
+          curl --fail --location --silent --show-error https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o "$RUNNER_TEMP/gitleaks.tar.gz"
+          echo '551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  '"$RUNNER_TEMP/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git . --redact --no-banner
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4; verified against GitHub API
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Install from the public registry
+        run: npm ci --registry=https://registry.npmjs.org
+      - name: Check types, mock tests, and build
+        run: |
+          npm run licenses:generate
+          npm run typecheck
+          npm test
+          npm run test:website
+          npm run build
+      - name: Package the independent Hub
+        run: npm run hub:package
+      - name: Verify the public source boundary
+        run: |
+          npm run audit:public -- --git-history
+          npm run hub:deployment:check
+      # No credentials or real upstream account are passed to PR jobs.
+      - name: Check the self-hosted Hub container with mock requests
+        run: npm run hub:container:smoke

@@ -1,0 +1,27 @@
+name: Bug report
+description: Report a reproducible problem with synthetic data
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, account files, private Hub addresses, or unredacted logs.
+        Report sensitive vulnerabilities through private vulnerability reporting.
+  - type: input
+    id: version
+    attributes:
+      label: Version and platform
+      placeholder: "0.1.0 / macOS arm64 or Linux Hub / Node 24"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction with mock data
+      description: Steps, expected behavior, and observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Only share data you have reviewed for sensitive information

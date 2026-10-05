@@ -1,0 +1,41 @@
+services:
+  hub:
+    build: .
+    image: share-token-hub:local
+    restart: unless-stopped
+    volumes:
+      - hub-data:/data
+    # Internal Docker network only; the Hub has no public plain-HTTP port.
+    expose:
+      - "4387"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    # Optional shared-code secret: enable it with the override documented in
+    # docs/SELF_HOSTING.md. Admin credentials are generated inside the volume.
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    environment:
+      HUB_DOMAIN: ${HUB_DOMAIN:?Set HUB_DOMAIN in .env to a domain you control}
+      NGINX_ENVSUBST_FILTER: ^HUB_DOMAIN$
+    ports:
+      - "443:443"
+    volumes:
+      - ./deploy/hub/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./deploy/hub/certs:/etc/nginx/certs:ro
+    depends_on:
+      hub:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+volumes:
+  hub-data:

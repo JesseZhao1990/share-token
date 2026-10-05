@@ -1,0 +1,27 @@
+# Dependencies, builds and private runtime state
+node_modules/
+dist/
+coverage/
+artifacts/
+.share-token/
+secrets/
+backups/
+.env
+.env.*
+!.env.example
+*.sqlite*
+*.db*
+*.token
+*.encrypted
+*.pem
+*.key
+*.p12
+*.pfx
+*.connection.json
+auth.json
+*.log
+.npmrc.local
+.DS_Store
+
+output/
+.playwright-cli/

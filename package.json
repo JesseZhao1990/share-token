@@ -1,0 +1,70 @@
+{
+  "name": "share-token",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
+  "scripts": {
+    "verify:codex": "tsx tests/codex.canary.ts",
+    "build": "tsc -p tsconfig.json && vite build --config apps/web/vite.config.ts && vite build --config apps/desktop/vite.config.ts && node scripts/desktop-assets.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p apps/web/tsconfig.json --noEmit && tsc -p apps/desktop/tsconfig.json --noEmit",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "dev": "tsx apps/cli/index.ts demo",
+    "start": "node dist/apps/cli/index.js",
+    "cli": "tsx apps/cli/index.ts",
+    "hub:package": "node scripts/package-hub.mjs",
+    "desktop": "electron .",
+    "desktop:build": "npm run build",
+    "desktop:package": "npm run build && node scripts/package-desktop.mjs",
+    "prebuild": "node scripts/prepare-desktop.mjs",
+    "predesktop": "node scripts/prepare-desktop.mjs",
+    "postinstall": "node scripts/prepare-desktop.mjs",
+    "verify:desktop": "npm run build && node scripts/desktop-canary.mjs",
+    "verify:desktop-release": "node scripts/verify-desktop-release.mjs",
+    "verify:desktop-codex": "tsx tests/desktop-codex.canary.ts",
+    "hub:tls:config": "node scripts/hub-tls-config.mjs",
+    "hub:tls:verify": "node scripts/hub-tls-verify.mjs",
+    "audit:public": "node scripts/audit-public.mjs",
+    "licenses:generate": "node scripts/generate-licenses.mjs",
+    "hub:container:smoke": "node scripts/hub-container-smoke.mjs",
+    "hub:deployment:check": "node scripts/hub-deployment-check.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs",
+    "test:website": "node --test tests/website.test.mjs"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/xterm": "6.0.0",
+    "node-pty": "1.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "ws": "^8.18.3",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@electron/osx-sign": "2.7.0",
+    "@electron/packager": "20.3.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@types/ws": "^8.18.1",
+    "electron": "44.4.3",
+    "node": "24.21.0",
+    "playwright": "1.63.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.0"
+  },
+  "main": "dist/apps/desktop/main/index.js",
+  "description": "Self-hosted inference gateway and local Codex bridge with explicit authorization and a mock-first demo.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JesseZhao1990/share-token.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JesseZhao1990/share-token/issues"
+  },
+  "homepage": "https://github.com/JesseZhao1990/share-token#readme"
+}

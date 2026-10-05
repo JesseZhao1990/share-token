@@ -1,0 +1,14 @@
+title = "Share Token public source"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated dependencies, outputs, and private local runtime are never part of the source release"
+paths = [
+  '''(?:^|/)node_modules/''',
+  '''(?:^|/)dist/''',
+  '''(?:^|/)artifacts/''',
+  '''(?:^|/)\.share-token/''',
+  '''(?:^|/)\.git/''',
+]

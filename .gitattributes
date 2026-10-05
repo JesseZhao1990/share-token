@@ -1,0 +1,3 @@
+* text=auto
+third_party/licenses/** -whitespace
+apps/desktop/packaging/Node-LICENSE.txt -whitespace

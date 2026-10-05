@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Share Token：自行部署的推理网关与本地 Codex Bridge。Self-hosted inference gateway and a local Codex bridge.">
+  <meta name="theme-color" content="#11191b">
+  <title>共享token · Share Token</title>
+  <link rel="icon" href="./mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./main.js"></script>
+</head>
+<body>
+  <header class="nav wrap">
+    <a class="brand" href="#top"><img src="./mark.svg" width="34" height="34" alt=""><span>共享token <small>SHARE TOKEN</small></span></a>
+    <nav aria-label="页面导航"><a href="#how">工作方式 / How it works</a><a href="#download">下载 / Download</a><a href="https://github.com/JesseZhao1990/share-token" rel="noopener noreferrer">GitHub ↗</a></nav>
+  </header>
+  <main id="top" class="wrap">
+    <section class="hero">
+      <p class="eyebrow">SELF-HOSTED · LOCAL TOOLS · EXPLICIT AUTHORIZATION</p>
+      <h1>自己的空间。<br>在自己的电脑上继续。</h1>
+      <p class="lead">自行部署推理网关，让明确授权的设备连接同一空间。<br>项目、终端和工具始终在使用方电脑上运行。</p>
+      <p class="english" lang="en">A self-hosted inference gateway and local Codex bridge. Connect explicitly authorized devices to your own space, with project tools running on the consumer’s computer.</p>
+      <div class="actions"><a class="button primary" href="#download">查看预览版 / Preview</a><a class="button secondary" href="https://github.com/JesseZhao1990/share-token#readme" rel="noopener noreferrer">源码与自建说明 / Source ↗</a></div>
+      <p class="small">macOS Apple Silicon 预览版 · 开源方案包含独立 Hub，自建运行环境。</p>
+    </section>
+    <section id="how" class="how">
+      <div class="section-title"><p class="eyebrow">HOW IT WORKS</p><h2>每一步，都有明确的边界。</h2><p lang="en">Your Hub. Your devices. Explicit permissions.</p></div>
+      <ol class="cards">
+        <li><span class="step">01</span><h3>部署你的 Hub</h3><p>在个人服务器或可访问的自有机器上部署 Hub，配置 HTTPS/WSS 与持久数据目录。</p><p class="english" lang="en">Run a Hub on infrastructure you control, with HTTPS/WSS and persistent storage.</p></li>
+        <li><span class="step">02</span><h3>连接并授权</h3><p>参与者连接同一空间。加入空间后，提供方仍需明确授权设备、模型和额度规则。</p><p class="english" lang="en">Pair your devices, then explicitly authorize access and usage policies. Joining alone grants no source access.</p></li>
+        <li><span class="step">03</span><h3>在本机完成项目</h3><p>Codex 经本地 Bridge 使用配置的来源。本地工具在使用方运行；提供方的分享进程需要在线。</p><p class="english" lang="en">Codex uses the local bridge. Tools execute locally; the provider and its sharing process must remain online.</p></li>
+      </ol>
+    </section>
+    <section class="boundary">
+      <h2>从模拟环境开始</h2><p>源码包含无需真实账户的模拟 Hub 与测试。实际模型接入需要各自授权；请先确认所使用服务允许相应用途。默认配置不包含账户、连接空间或线上凭据。</p>
+      <p class="english" lang="en">Start with the mock demo, which needs no real model account. Configure only upstream services you are authorized to use. No account or hosted space is included.</p>
+      <p class="small">HTTPS/WSS 保护传输；当前 Hub 与 Relay 会在内存中处理请求内容，并非端到端加密。<span lang="en">The Hub and relay process payloads in memory; transport is not end-to-end encrypted.</span></p>
+    </section>
+    <section id="download" class="download">
+      <div class="section-title"><p class="eyebrow">MACOS PREVIEW</p><h2>下载公开预览版</h2><p lang="en">Public preview releases, when available.</p></div>
+      <div class="release-card">
+        <p id="release-status" class="release-status" role="status">正在查询公开发布状态… / Checking public releases…</p>
+        <p id="release-detail" class="small">仓库和版本发布尚未确认。 / Repository and release availability have not been confirmed.</p>
+        <div id="release-assets" class="actions" hidden></div>
+        <a class="text-link" href="https://github.com/JesseZhao1990/share-token/releases" rel="noopener noreferrer">查看 GitHub 发布页 / View releases ↗</a>
+        <noscript><p>请打开 GitHub 发布页查询可用版本。 / Visit the releases page to check available versions.</p></noscript>
+      </div>
+      <div class="download-notes"><p><strong>连接：</strong>通用预览包不预置空间；在“更多连接方式”中填写受信任 Hub 的 HTTPS 地址。公网域名使用有效的公信证书。</p><p lang="en"><strong>Connection:</strong> Generic previews include no space. Enter a trusted Hub’s HTTPS address under advanced connection options. Public domains require a valid publicly trusted certificate.</p><p><strong>安装：</strong>当前预览构建使用 ad-hoc 签名，未完成 Apple 公证。macOS 可能阻止打开；正式系统信任和另一台 Mac 的安装需要独立验收。</p><p lang="en"><strong>Installation:</strong> Current previews use ad-hoc signing and are not notarized by Apple. macOS may block the app. A passing build does not establish trust or confirm installation on another Mac.</p></div>
+    </section>
+  </main>
+  <footer class="wrap"><span>共享token · SHARE TOKEN</span><p>独立开源项目，与 OpenAI 无隶属关系。<br><span lang="en">An independent project, not affiliated with OpenAI.</span></p><a href="https://github.com/JesseZhao1990/share-token/blob/main/LICENSE" rel="noopener noreferrer">License ↗</a></footer>
+</body>
+</html>

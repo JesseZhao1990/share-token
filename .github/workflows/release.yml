@@ -1,0 +1,89 @@
+name: Draft macOS preview
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag matching package.json, for example v0.1.0'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    # Standard GitHub-hosted Apple Silicon runner, never a private runner.
+    runs-on: macos-14
+    timeout-minutes: 40
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4; verified against GitHub API
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4; verified against GitHub API
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Verify runner, tag, and exact source commit
+        run: |
+          node -e 'if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("The preview requires an Apple Silicon macOS runner.")'
+          node --input-type=module -e 'import { readBuildMetadata } from "./scripts/build-meta.mjs"; console.log(JSON.stringify(await readBuildMetadata(), null, 2));'
+      - name: Install public dependencies
+        run: npm ci --registry=https://registry.npmjs.org
+      - name: Check the tagged source using mock tests
+        run: |
+          npm run licenses:generate
+          npm run typecheck
+          npm test
+          npm run test:website
+          npm run audit:public
+      - name: Build a generic ad-hoc preview
+        run: npm run desktop:package
+      - name: Verify the final delivered ZIP
+        run: npm run verify:desktop-release
+      - name: Prepare only verified public release assets
+        run: npm run release:prepare
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4; verified against GitHub API
+        with:
+          name: generic-macos-preview
+          path: artifacts/release/
+          if-no-files-found: error
+          retention-days: 14
+
+  draft:
+    needs: preview
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4; verified against GitHub API
+        with:
+          name: generic-macos-preview
+          path: release-assets
+      - name: Create a draft for manual review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo 'A release already exists for this tag. Review it manually; this workflow will not replace its assets.'
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" --repo "$GH_REPO" --verify-tag --draft --prerelease \
+            --title "Share Token $RELEASE_TAG — macOS preview" \
+            --notes-file release-assets/release-notes.md \
+            release-assets/*.zip release-assets/*.sha256 release-assets/release-manifest.json \
+            release-assets/LICENSE release-assets/NOTICE release-assets/THIRD_PARTY_NOTICES.md

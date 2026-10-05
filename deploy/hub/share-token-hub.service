@@ -1,0 +1,23 @@
+[Unit]
+Description=Share Token Hub
+After=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/share-token/current
+ExecStart=%h/.local/share/share-token/runtime/bin/node dist/apps/cli/index.js hub --host 127.0.0.1 --port 4387 --data-dir %h/.local/share/share-token/data
+Environment=NODE_ENV=production
+UMask=0077
+NoNewPrivileges=true
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=share-token-hub
+
+[Install]
+WantedBy=default.target

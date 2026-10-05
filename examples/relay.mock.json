@@ -1,0 +1,24 @@
+{
+  "hubUrl": "http://127.0.0.1:4387",
+  "tokenFile": "relay.token",
+  "sourceId": "REPLACE_WITH_SOURCE_ID",
+  "nodeId": "my-mock-relay",
+  "dbPath": "relay.sqlite",
+  "policy": {
+    "allowedMemberIds": ["REPLACE_WITH_MEMBER_ID"],
+    "models": ["mock-codex"],
+    "reservePercent": 20,
+    "startMarginPercent": 5,
+    "quotaMaxAgeMs": 120000,
+    "maxRequestMs": 900000,
+    "maxBodyBytes": 8388608,
+    "enabled": true,
+    "expiresAt": null,
+    "schedule": null
+  },
+  "adapter": {
+    "kind": "mock",
+    "accountBinding": "mock:my-machine",
+    "models": ["mock-codex"]
+  }
+}

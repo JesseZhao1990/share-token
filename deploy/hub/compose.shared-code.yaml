@@ -1,0 +1,10 @@
+services:
+  hub:
+    environment:
+      HUB_SHARED_CODE_FILE: /run/secrets/hub_shared_code
+    secrets:
+      - hub_shared_code
+
+secrets:
+  hub_shared_code:
+    file: ./deploy/hub/secrets/shared-code.txt
