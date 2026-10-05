@@ -5,9 +5,9 @@ This repository uses public npm packages, standard GitHub-hosted runners, and Gi
 ## A reviewed preview release
 
 1. Complete the source audit and mock checks on the final commit. Keep `package.json` and the root lock-file package version equal.
-2. Set the new package version before committing. Create and push an immutable tag `v<package.json version>` only after review. The workflow also supports a manually selected existing tag.
+2. Set the new package version before committing. Create and push an immutable tag `v<package.json version>` only after review. Tagged builds reject tracked and untracked source changes; regenerated `THIRD_PARTY_NOTICES.md`, `third_party/licenses/`, and Git-ignored build outputs may vary. The workflow also supports a manually selected existing tag.
 3. The draft workflow checks the tag against the actual checkout, builds a **generic macOS Apple Silicon ZIP**, then extracts that exact archive and verifies signatures, Node/PTY execution, and an isolated Electron launch.
-4. It stages only the ZIP, SHA-256 file, redacted `release-manifest.json`, and license notices. Detailed local reports, temporary paths, screenshots, and app data are not uploaded as public assets.
+4. It removes source maps and JS/CSS mapping annotations from desktop staging, then confirms their absence in the extracted ZIP. It uploads only the ZIP, SHA-256 file, redacted `release-manifest.json`, and license notices. Detailed local reports, temporary paths, screenshots, and app data are not uploaded as public assets.
 5. Review the resulting **draft prerelease** in GitHub. Download it, compare the manifest and SHA-256, and test installation on another Mac. Publishing the draft is a separate manual action. A workflow run alone is not a public release.
 
 The package is **ad-hoc signed and not Apple-notarized**. No Developer ID certificate or Apple account is used in the workflow. Gatekeeper may reject the preview. Keep that status in the release notes and website until a separate personal Developer ID signing and notarization flow has been implemented and validated.

@@ -6,6 +6,26 @@ import { promisify } from 'node:util';
 const exec = promisify(execFile);
 const versionPattern = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/;
 
+const generatedLicensePath = path => path === 'THIRD_PARTY_NOTICES.md' || path.startsWith('third_party/licenses/');
+
+/** Keep tagged provenance honest while allowing platform-specific license inventory output. */
+export async function assertTaggedSourceClean(root) {
+  const status = (await exec('git', ['status', '--porcelain=v1', '-z', '--untracked-files=all'], { cwd: root, maxBuffer: 20 * 1024 * 1024 })).stdout;
+  const entries = status.split('\0');
+  const changed = [];
+  for (let index = 0; index < entries.length; index++) {
+    const entry = entries[index];
+    if (!entry) continue;
+    const code = entry.slice(0, 2);
+    const paths = [entry.slice(3)];
+    // -z renames put the destination first, followed by the original path.
+    // Both must be checked so moving source into the license directory cannot bypass the guard.
+    if (code.includes('R') || code.includes('C')) paths.push(entries[++index] ?? '');
+    for (const path of paths) if (!path || !generatedLicensePath(path)) changed.push(path);
+  }
+  if (changed.length) throw new Error('Tagged builds require committed source. Only generated license inventories and Git-ignored outputs may vary.');
+}
+
 export function buildMetadata(packageVersion, env = {}, gitCommit = null) {
   if (typeof packageVersion !== 'string' || !versionPattern.test(packageVersion)) throw new Error('Invalid package version.');
   if (gitCommit !== null && !/^[a-f0-9]{40}$/.test(gitCommit)) throw new Error('Invalid Git commit.');
@@ -40,6 +60,7 @@ export async function readBuildMetadata(root = process.cwd(), env = process.env)
     try { tagCommit = (await exec('git', ['rev-list', '-n', '1', env.RELEASE_TAG], { cwd: root })).stdout.trim(); }
     catch { throw new Error('The release tag must exist in this checkout.'); }
     if (tagCommit !== gitCommit) throw new Error('The release tag does not identify the checked-out commit.');
+    await assertTaggedSourceClean(root);
   }
   return result;
 }

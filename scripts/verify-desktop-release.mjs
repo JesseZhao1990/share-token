@@ -12,6 +12,7 @@ import { readBuildMetadata } from './build-meta.mjs';
 import { desktopBrand, verifyDesktopBrand } from './desktop-brand.mjs';
 import { readDesktopHubProfile } from './desktop-profile.mjs';
 import { validateHubTrustProfile } from '../dist/packages/hub-client/trust.js';
+import { assertNoSourceMaps } from './strip-source-maps.mjs';
 
 // Exercise the delivered ZIP, not the staging directory. No real device is
 // paired, no subscription is accessed, and only temporary profiles are used.
@@ -40,6 +41,7 @@ async function stopApp() {
 }
 try {
   await exec('/usr/bin/ditto', ['-x', '-k', archive, dir]);
+  await assertNoSourceMaps(join(resourcePath, 'dist'));
   const branding = await verifyDesktopBrand(appPath);
   const manifest = JSON.parse(await readFile(join(resourcePath, 'runtime/manifest.json'), 'utf8'));
   assert.doesNotMatch(await readFile(join(resourcePath, 'dist/apps/desktop/main/index.js'), 'utf8'), /safeStorage\s*[.(]/);

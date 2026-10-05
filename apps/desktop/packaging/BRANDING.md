@@ -9,4 +9,6 @@
 
 在 macOS 项目根目录运行 `node scripts/desktop-icons.mjs` 可从原始素材重新生成系统图标。打包时会校验显示名、图标内容和应用资源，避免退回 Electron 默认图标。
 
-内部 bundle ID、可执行文件名和历史用户数据目录保持稳定，用户升级后仍可沿用原有连接与设置。ZIP 文件名保留 ASCII，解压得到 `共享token.app`。
+开源版本使用独立 bundle ID `io.github.jessezhao1990.sharetoken` 和 `Share Token Open Source` 用户数据目录。可执行文件名为 `Share Token`；ZIP 文件名保留 ASCII，解压得到 `共享token.app`。同一开源应用后续升级继续使用这个独立身份与数据目录。
+
+Electron Packager 也会尝试可选的 Icon Composer `.icon` 格式。仓库提供的是传统 `.icns`；缺少 `.icon` 的提示不表示 `.icns` 未带入。打包验证会核对应用 `CFBundleIconFile`、ICNS 文件魔数和与源图标一致的 SHA-256，以及界面 PNG 资源。

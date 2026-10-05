@@ -10,6 +10,7 @@ import { validateHubTrustProfile } from '../dist/packages/hub-client/trust.js';
 import { readBuildMetadata } from './build-meta.mjs';
 import { desktopBrand, verifyDesktopBrand } from './desktop-brand.mjs';
 import { readDesktopHubProfile } from './desktop-profile.mjs';
+import { stripSourceMaps } from './strip-source-maps.mjs';
 
 if (process.platform !== 'darwin' || process.arch !== 'arm64') throw new Error('This build is validated for macOS arm64 only. Cross-platform packaging is not yet supported.');
 const root = process.cwd();
@@ -19,6 +20,7 @@ const hubProfile = await readDesktopHubProfile(validateHubTrustProfile, { args: 
 const staging = resolve('.share-token/desktop-staging');
 await rm(staging, { recursive: true, force: true }); await mkdir(staging, { recursive: true });
 await cp('dist', join(staging, 'dist'), { recursive: true });
+const sourceMaps = await stripSourceMaps(join(staging, 'dist'));
 // An optional deployment-specific public profile removes address/certificate setup for friends.
 // Never package a join code or device/admin credential in this public file.
 await rm(join(staging, 'dist/apps/desktop/default.connection.json'), { force: true });
@@ -39,7 +41,9 @@ await writeFile(join(staging, 'package.json'), JSON.stringify({ name: 'share-tok
 await writeFile(join(staging, 'build-info.json'), JSON.stringify({ version: metadata.version, ...metadata.provenance }, null, 2) + '\n');
 const nodeBytes = await readFile(join(staging, 'runtime/node'));
 const runtimeHash = createHash('sha256').update(nodeBytes).digest('hex');
-await writeFile(join(staging, 'runtime/manifest.json'), JSON.stringify({ version: process.version, platform: process.platform, arch: process.arch, sha256: runtimeHash, channel: 'adhoc-development-preview', notarized: false }, null, 2));
+const runtimeVersion = (await exec(join(staging, 'runtime/node'), ['--version'])).stdout.trim();
+if (!/^v24\./.test(runtimeVersion)) throw new Error('The packaged sidecar must run Node.js 24.');
+await writeFile(join(staging, 'runtime/manifest.json'), JSON.stringify({ version: runtimeVersion, platform: process.platform, arch: process.arch, sha256: runtimeHash, channel: 'adhoc-development-preview', notarized: false }, null, 2));
 const paths = await packager({ dir: staging, out: resolve('artifacts/desktop', metadata.version), name: desktopBrand.name, executableName: desktopBrand.executableName, appBundleId: desktopBrand.bundleId, appVersion: metadata.version, icon: resolve(desktopBrand.icon), extendInfo: { CFBundleDisplayName: desktopBrand.name }, platform: 'darwin', arch: 'arm64', electronVersion: '44.4.3', overwrite: true, asar: false, prune: false, osxSign: false, usageDescription: { NSHumanReadableCopyright: '共享token — open-source desktop preview' } });
 for (const path of paths) {
   const appPath = join(path, desktopBrand.bundleName);
@@ -69,7 +73,7 @@ for (const path of paths) {
     schemaVersion: 1, product: 'share-token', distribution: hubProfile ? 'preconfigured' : 'generic',
     version: metadata.version, platform: 'darwin-arm64', signing: 'ad-hoc', notarized: false,
     archive: metadata.archive, size: (await stat(archive)).size, sha256: hash,
-    provenance: metadata.provenance, branding,
+    provenance: metadata.provenance, branding, sourceMaps,
     sourceApp: signed, extractedArchive: archiveVerification,
     verifiedAt: new Date().toISOString(),
   };
