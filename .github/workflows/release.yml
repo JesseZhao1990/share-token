@@ -38,6 +38,11 @@ jobs:
         run: |
           node -e 'if (process.platform !== "darwin" || process.arch !== "arm64") throw new Error("The preview requires an Apple Silicon macOS runner.")'
           node --input-type=module -e 'import { readBuildMetadata } from "./scripts/build-meta.mjs"; console.log(JSON.stringify(await readBuildMetadata(), null, 2));'
+      - name: Select the public TLS fixture tool
+        run: |
+          openssl_bin="$(brew --prefix openssl@3)/bin/openssl"
+          "$openssl_bin" version
+          echo "SHARE_TOKEN_TEST_OPENSSL=$openssl_bin" >> "$GITHUB_ENV"
       - name: Install public dependencies
         run: npm ci --registry=https://registry.npmjs.org
       - name: Check the tagged source using mock tests

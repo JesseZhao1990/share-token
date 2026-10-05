@@ -34,3 +34,5 @@ npm run verify:desktop-release
 真实推理、原生完整工具循环、长上下文、长期网络表现和其他客户端是独立验收项。默认关闭的实验订阅适配不得因单元测试通过而宣称获准使用。
 
 运行目录、认证文件、数据库、证书私钥、日志和证据仅留在本机。`artifacts/` 保存安装包及检查报告，源码仓库不收录这些文件。
+
+TLS mock tests require OpenSSL 3 or newer. On macOS, install the public Homebrew `openssl@3` package; the test fixtures also accept an explicit `SHARE_TOKEN_TEST_OPENSSL` binary path. CI records the selected public tool version and does not use real certificates or accounts.

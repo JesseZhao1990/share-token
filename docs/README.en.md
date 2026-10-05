@@ -4,7 +4,7 @@ A self-hosted inference gateway and local Codex bridge. A Hub manages device
 pairing, explicit grants, fixed source routing, and request state. Consumer tools
 run on the consumer's own computer; providers connect through an outbound Relay.
 
-The initial open-source version **0.1.0 is mock-first**. Its default demo uses
+The initial open-source version **0.1.1 is mock-first**. Its default demo uses
 synthetic responses without a model account or paid requests. Personal
 subscription support is experimental and disabled by default. The HTTP API
 fixture is for protocol comparisons, not a validated production API product.

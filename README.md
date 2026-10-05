@@ -2,7 +2,7 @@
 
 一个可以自行部署的推理网关与本机 Codex 接入工具。Hub 管理成员、授权、固定来源路由与请求状态；Consumer Bridge 和 Relay 分别在使用方和提供方电脑运行，本地工具仍由使用方执行。
 
-**开源首版 0.1.0 默认运行模拟环境。** 模拟模型返回合成结果，不调用真实模型，也不能完成真实编程任务。个人订阅共享属于默认关闭的实验适配；现有 HTTP API 适配器仅供对照测试，尚未作为生产 API 产品验收。
+**开源预览版 0.1.1 默认运行模拟环境。** 模拟模型返回合成结果，不调用真实模型，也不能完成真实编程任务。个人订阅共享属于默认关闭的实验适配；现有 HTTP API 适配器仅供对照测试，尚未作为生产 API 产品验收。
 
 [官网](https://jessezhao1990.github.io/share-token/) · [English](docs/README.en.md) · [自建 Hub](docs/SELF_HOSTING.md) · [开发指南](docs/DEVELOPMENT.md) · [发行流程](docs/RELEASING.md) · [安全边界](SECURITY.md)
 

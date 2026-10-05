@@ -46,3 +46,26 @@ jobs:
       # No credentials or real upstream account are passed to PR jobs.
       - name: Check the self-hosted Hub container with mock requests
         run: npm run hub:container:smoke
+
+  macos-tests:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Select the public TLS fixture tool
+        run: |
+          openssl_bin="$(brew --prefix openssl@3)/bin/openssl"
+          "$openssl_bin" version
+          echo "SHARE_TOKEN_TEST_OPENSSL=$openssl_bin" >> "$GITHUB_ENV"
+      - name: Check macOS source using mocks
+        run: |
+          npm ci --registry=https://registry.npmjs.org
+          npm run typecheck
+          npm test
+          npm run test:website
+          npm run audit:public

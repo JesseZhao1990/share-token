@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { runTestOpenSSL } from './fixtures/openssl.js';
 import { chmod, lstat, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:https';
 import { tmpdir } from 'node:os';
@@ -22,8 +22,8 @@ async function fixture(t: { after(fn: () => Promise<unknown>): void }, target = 
   const directory = await realpath(await mkdtemp(join(tmpdir(), 'share-token-tls-')));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const cert = join(directory, 'server.pem'); const key = join(directory, 'server.key');
-  execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '2', '-keyout', key, '-out', cert,
-    '-subj', `/CN=${target}`, '-addext', `subjectAltName=${san}`, '-addext', 'basicConstraints=critical,CA:FALSE', '-addext', 'extendedKeyUsage=serverAuth'], { stdio: 'ignore' });
+  runTestOpenSSL(['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '2', '-keyout', key, '-out', cert,
+    '-subj', `/CN=${target}`, '-addext', `subjectAltName=${san}`, '-addext', 'basicConstraints=critical,CA:FALSE', '-addext', 'extendedKeyUsage=serverAuth']);
   await chmod(key, 0o600);
   return { directory, options: { hostname: target, cert, key, out: join(directory, 'nginx'), user: 'hubtest' } };
 }
@@ -118,7 +118,7 @@ test('certificate validation checks SAN, validity, leaf purpose, key match, and 
   await assert.rejects(validateCertificate({ ...options, now: Date.parse(certificate.validTo) + 1 }), /expired/);
   await assert.rejects(validateCertificate({ ...options, now: Date.parse(certificate.validFrom) - 1 }), /not yet valid/);
   const otherKey = join(directory, 'other.key');
-  execFileSync('openssl', ['genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', otherKey], { stdio: 'ignore' });
+  runTestOpenSSL(['genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', otherKey]);
   await chmod(otherKey, 0o600);
   await assert.rejects(validateCertificate({ ...options, key: otherKey }), /do not match/);
   await chmod(options.key, 0o644);
@@ -127,11 +127,11 @@ test('certificate validation checks SAN, validity, leaf purpose, key match, and 
   const invalid = join(directory, 'invalid.pem'); await writeFile(invalid, 'not a certificate');
   await assert.rejects(validateCertificate({ ...options, cert: invalid }), /PEM/);
   const caCert = join(directory, 'ca.pem');
-  execFileSync('openssl', ['req', '-x509', '-new', '-key', options.key, '-days', '2', '-out', caCert, '-subj', '/CN=Test CA', '-addext', 'basicConstraints=critical,CA:TRUE'], { stdio: 'ignore' });
+  runTestOpenSSL(['req', '-x509', '-new', '-key', options.key, '-days', '2', '-out', caCert, '-subj', '/CN=Test CA', '-addext', 'basicConstraints=critical,CA:TRUE']);
   await assert.rejects(validateCertificate({ ...options, cert: caCert }), /server leaf/);
   const clientCert = join(directory, 'client.pem');
-  execFileSync('openssl', ['req', '-x509', '-new', '-key', options.key, '-days', '2', '-out', clientCert, '-subj', `/CN=${hostname}`,
-    '-addext', `subjectAltName=DNS:${hostname}`, '-addext', 'basicConstraints=critical,CA:FALSE', '-addext', 'extendedKeyUsage=clientAuth'], { stdio: 'ignore' });
+  runTestOpenSSL(['req', '-x509', '-new', '-key', options.key, '-days', '2', '-out', clientCert, '-subj', `/CN=${hostname}`,
+    '-addext', `subjectAltName=DNS:${hostname}`, '-addext', 'basicConstraints=critical,CA:FALSE', '-addext', 'extendedKeyUsage=clientAuth']);
   await assert.rejects(validateCertificate({ ...options, cert: clientCert }), /server authentication/);
   const chain = join(directory, 'bad-chain.pem');
   await writeFile(chain, await readFile(options.cert, 'utf8') + await readFile(caCert, 'utf8'));

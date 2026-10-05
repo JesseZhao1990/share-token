@@ -1,6 +1,6 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { runTestOpenSSL } from './fixtures/openssl.js';
 import { X509Certificate } from 'node:crypto';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -14,9 +14,9 @@ async function fixture(t: TestContext) {
   t.after(() => rm(directory, { recursive: true, force: true }));
   const certPath = join(directory, 'server.pem');
   const keyPath = join(directory, 'server.key');
-  execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '2', '-keyout', keyPath, '-out', certPath,
+  runTestOpenSSL(['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '2', '-keyout', keyPath, '-out', certPath,
     '-subj', '/CN=10.20.30.40', '-addext', 'subjectAltName=IP:10.20.30.40', '-addext', 'basicConstraints=critical,CA:FALSE',
-    '-addext', 'keyUsage=critical,digitalSignature,keyEncipherment', '-addext', 'extendedKeyUsage=serverAuth'], { stdio: 'ignore' });
+    '-addext', 'keyUsage=critical,digitalSignature,keyEncipherment', '-addext', 'extendedKeyUsage=serverAuth']);
   const certificatePem = await readFile(certPath, 'utf8');
   const profile = { version: 1, hubUrl: 'https://10.20.30.40', certificatePem, label: 'Desktop fixture' };
   const file = join(directory, 'public.connection.json');

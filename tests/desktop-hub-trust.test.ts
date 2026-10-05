@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { runTestOpenSSL } from './fixtures/openssl.js';
 import { chmod, lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -14,9 +14,9 @@ async function fixture(t: { after(fn: () => Promise<void>): void }) {
   const userData = join(directory, 'app'); await mkdir(userData, { mode: 0o700 });
   async function certificate(suffix: string, ip = '10.20.30.40') {
     const path = join(directory, suffix + '.pem');
-    execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '2', '-keyout', join(directory, suffix + '.key'), '-out', path,
+    runTestOpenSSL(['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '2', '-keyout', join(directory, suffix + '.key'), '-out', path,
       '-subj', '/CN=Share Token Test', '-addext', `subjectAltName=IP:${ip}`, '-addext', 'basicConstraints=critical,CA:FALSE',
-      '-addext', 'keyUsage=critical,digitalSignature,keyEncipherment', '-addext', 'extendedKeyUsage=serverAuth'], { stdio: 'ignore' });
+      '-addext', 'keyUsage=critical,digitalSignature,keyEncipherment', '-addext', 'extendedKeyUsage=serverAuth']);
     return readFile(path, 'utf8');
   }
   const profile: HubTrustProfile = { version: 1, hubUrl: 'https://10.20.30.40', certificatePem: await certificate('server'), label: 'Private test Hub' };

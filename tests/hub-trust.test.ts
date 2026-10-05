@@ -1,6 +1,6 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { runTestOpenSSL } from './fixtures/openssl.js';
 import { X509Certificate } from 'node:crypto';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { createServer, type Server } from 'node:https';
@@ -20,14 +20,14 @@ async function fixture(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), 'share-token-trust-'));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const keyPath = join(directory, 'server.key');
-  execFileSync('openssl', ['genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', keyPath], { stdio: 'ignore' });
+  runTestOpenSSL(['genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', keyPath]);
   const certificate = async (name: string, settings: { san?: string; ca?: boolean; eku?: string; ku?: string; days?: string } = {}) => {
     const certPath = join(directory, `${name}.pem`);
-    execFileSync('openssl', ['req', '-x509', '-new', '-key', keyPath, '-days', settings.days ?? '2', '-out', certPath,
+    runTestOpenSSL(['req', '-x509', '-new', '-key', keyPath, '-days', settings.days ?? '2', '-out', certPath,
       '-subj', `/CN=${ip}`, '-addext', `subjectAltName=IP:${settings.san ?? ip}`,
       '-addext', `basicConstraints=critical,CA:${settings.ca ? 'TRUE' : 'FALSE'}`,
       '-addext', `keyUsage=critical,${settings.ku ?? 'digitalSignature,keyEncipherment'}`,
-      '-addext', `extendedKeyUsage=${settings.eku ?? 'serverAuth'}`], { stdio: 'ignore' });
+      '-addext', `extendedKeyUsage=${settings.eku ?? 'serverAuth'}`]);
     return readFile(certPath, 'utf8');
   };
   const cert = await certificate('server'); const key = await readFile(keyPath, 'utf8');
