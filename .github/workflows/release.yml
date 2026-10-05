@@ -53,7 +53,7 @@ jobs:
         run: npm run verify:desktop-release
       - name: Prepare only verified public release assets
         run: npm run release:prepare
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4; verified against GitHub API
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4; verified against GitHub API
         with:
           name: generic-macos-preview
           path: artifacts/release/
